@@ -5,4 +5,4 @@ A simple logger in C.
 
 [Link to the original version.](original-code)
 
-[original-code]: (http://simplestcodings.blogspot.com/2010/10/simple-logger-in-c.html)
+[original-code]: http://simplestcodings.blogspot.com/2010/10/simple-logger-in-c.html
