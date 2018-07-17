@@ -1,7 +1,9 @@
 /**
- * Original code from Varun Gubpta.
+ * Codigo original por Varun Gupta
+ * Link para o site:
+ * http://simplestcodings.blogspot.com/2010/10/simple-logger-in-c.html
  *
- * Modified by Matheus Carnelutt
+ * Alterado por Matheus Carnelutt
  */
 
 #include "logger.h"
@@ -9,33 +11,44 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <time.h>
 
 FILE *fp;
+
+#ifdef DEBUG
 static int SESSION_TRACKER;  // Keeps track of session
 
-char *print_time() {
-  int size = 0;
-  time_t t;
-  char *buf;
+/*
+  Gets the current date/time and returns it as a string of the form:
+  [yyyy-mm-dd hh:mm:ss]
+  Returned char pointer must be freed.
+*/
+static char *getDateString() {
+  // Initialize and get current time
+  time_t t = time(NULL);
 
-  t = time(NULL); /* get current calendar time */
+  // Allocate space for date string
+  char *date = (char *) malloc(100);
 
-  char *timestr = asctime(localtime(&t));
+  // Format the time correctly
+  strftime(date, 100, "[%F %T]", localtime(&t));
 
-  timestr[strlen(timestr) - 1] = 0;  // Getting rid of \n
-
-  size = strlen(timestr) + 1 + 2;  // Additional +2 for square braces
-  buf  = (char *) malloc(size);
-
-  memset(buf, 0x0, size);
-  snprintf(buf, size, "[%s]", timestr);
-
-  return buf;
+  return date;
 }
-void log_print(char *filename, int line, char *fmt, ...) {
+#endif
+
+void log_print(char *filename, int line, int stdout_print, char *fmt, ...) {
   va_list list;
+
+  if (stdout_print) {
+    va_start(list, fmt);
+    vfprintf(stdout, fmt, list);
+    va_end(list);
+    fputc('\n', stdout);
+  }
+
+  #ifdef DEBUG
+
   char *time_string;
 
   if (SESSION_TRACKER > 0)
@@ -43,11 +56,11 @@ void log_print(char *filename, int line, char *fmt, ...) {
   else
     fp = fopen("log.txt", "w");
 
-  time_string = print_time();
+  time_string = getDateString();
   fprintf(fp, "%s ", time_string);
   free(time_string);
 
-  fprintf(fp, "[%s:%d] ", filename, line);
+  fprintf(fp, "%s:%d: ", filename, line);
 
   va_start(list, fmt);
   vfprintf(fp, fmt, list);
@@ -58,4 +71,6 @@ void log_print(char *filename, int line, char *fmt, ...) {
   SESSION_TRACKER++;
 
   fclose(fp);
+
+  #endif
 }
